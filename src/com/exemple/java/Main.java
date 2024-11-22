@@ -3,76 +3,100 @@ package com.exemple.java;
 import java.util.Scanner;
 
 public class Main {
-
     public static void main(String[] args) {
-        displayWelcomeMessage();
-        Scanner sc = new Scanner(System.in);
+        welcome();
+        try (Scanner scanner = new Scanner(System.in)) { // Ensure Scanner is closed automatically
+            while (true) {
+                printMenu();
+                int choice = getUserChoice(scanner);
 
-        double num1 = getNumberInput(sc, "Please enter the first number: ");
+                if (choice == 5) {
+                    System.out.println("\nThank you for using the Calculator. Goodbye!");
+                    break;
+                }
 
-        String operation = getOperationInput(sc);
+                if (choice < 1 || choice > 5) {
+                    System.out.println("❌ Invalid option! Please select a valid choice.");
+                    continue;
+                }
 
-        double num2 = getNumberInput(sc, "Please enter the second number: ");
+                double num1 = getNumber(scanner, "Enter first number: ");
+                double num2 = getNumber(scanner, "Enter second number: ");
+                double result = performOperation(choice, num1, num2);
 
-        double result = calculateResult(num1, num2, operation);
-
-        if(!Double.isNaN(result)) {
-            System.out.println(formatEquation(num1, num2, operation) + result);
-        }
-
-    }
-
-    public static void displayWelcomeMessage() {
-        System.out.println("########################");
-        System.out.println("Welcome To Calculator: ");
-        System.out.println("########################");
-    }
-
-    public static double getNumberInput(Scanner sc, String prompt) {
-        System.out.print(prompt);
-        return sc.nextDouble();
-    }
-
-    public static String getOperationInput(Scanner sc) {
-        System.out.println("Operation should be only: +, -, *, /");
-        System.out.print("Choose the operation: ");
-        return sc.next();
-    }
-
-    public static double calculateResult(double num1, double num2, String operation) {
-        return switch (operation) {
-            case "+" -> Sum(num1, num2);
-            case "-" -> Sub(num1, num2);
-            case "*" -> Mul(num1, num2);
-            case "/" -> Div(num1, num2);
-            default -> {
-                System.out.println("Invalid operation");
-                yield Double.NaN;
+                if (!Double.isNaN(result)) {
+                    System.out.println("The result is: " + result);
+                }
             }
+        }
+    }
+
+    private static void welcome() {
+        System.out.println("\n" + "=".repeat(50));
+        System.out.println("                Welcome To Calculator");
+        System.out.println("=".repeat(50));
+    }
+
+    private static void printMenu() {
+        System.out.println("\n");
+        System.out.println("1. Add ");
+        System.out.println("2. Subtract");
+        System.out.println("3. Multiply");
+        System.out.println("4. Divide");
+        System.out.println("5. Exit");
+        System.out.println("=".repeat(50));
+    }
+
+    private static int getUserChoice(Scanner scanner) {
+        System.out.print("Choose an option: ");
+        while (!scanner.hasNextInt()) { // Validate user input as integer
+            System.out.println("❌ Invalid input! Please enter a number between 1 and 5.");
+            scanner.next(); // Clear invalid input
+            System.out.print("Choose an option: ");
+        }
+        return scanner.nextInt();
+    }
+
+    private static double getNumber(Scanner scanner, String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            if (scanner.hasNextDouble()) {
+                return scanner.nextDouble();
+            } else {
+                System.out.println("❌ Invalid input! Please enter a valid number.");
+                scanner.next(); // Clear invalid input
+            }
+        }
+    }
+
+    private static double performOperation(int choice, double num1, double num2) {
+        return switch (choice) {
+            case 1 -> add(num1, num2);
+            case 2 -> subtract(num1, num2);
+            case 3 -> multiply(num1, num2);
+            case 4 -> divide(num1, num2);
+            default -> Double.NaN; // This should never happen due to earlier validation
         };
     }
 
-    public static double Sum(double a, double b) {
+    // Calculator operations
+    private static double add(double a, double b) {
         return a + b;
     }
 
-    public static double Sub(double a, double b) {
+    private static double subtract(double a, double b) {
         return a - b;
     }
 
-    public static double Mul(double a, double b) {
+    private static double multiply(double a, double b) {
         return a * b;
     }
 
-    public static double Div(double a, double b) {
+    private static double divide(double a, double b) {
         if (b == 0) {
-            System.out.println("Error: Division by zero is not allowed.");
+            System.out.println("❌ Error: Division by zero is not allowed!");
             return Double.NaN;
         }
         return a / b;
-    }
-
-    public static String formatEquation(double num1, double num2, String operation) {
-        return (num1 + " " + operation + " " + num2 + " " + " = ");
     }
 }
